@@ -1,0 +1,17 @@
+*.pyc
+*.pyo
+__pycache__/
+env/
+.DS_Store
+*.swp
+*.egg-info/
+dist/
+build/
+node_modules/
+.vscode/
+
+# Test Scripts and Local Configs
+integration_test.py
+verify_imports.py
+site_config.json
+*.log

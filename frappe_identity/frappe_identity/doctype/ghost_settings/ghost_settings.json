@@ -1,0 +1,69 @@
+{
+    "actions": [],
+    "creation": "2024-05-22 10:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "enable_ghost_feature",
+        "enable_auto_cleanup",
+        "ghost_role",
+        "enable_auto_cleanup",
+        "ghost_email_domain",
+        "expiration_days"
+    ],
+    "fields": [
+        {
+            "default": "0",
+            "fieldname": "enable_ghost_feature",
+            "fieldtype": "Check",
+            "label": "Enable Ghost Feature"
+        },
+        {
+            "default": "1",
+            "fieldname": "enable_auto_cleanup",
+            "fieldtype": "Check",
+            "label": "Enable Auto Cleanup"
+        },
+        {
+            "default": "Guest",
+            "fieldname": "ghost_role",
+            "fieldtype": "Link",
+            "label": "Ghost Role",
+            "options": "Role"
+        },
+        {
+            "default": "guest.local",
+            "fieldname": "ghost_email_domain",
+            "fieldtype": "Data",
+            "label": "Ghost Email Domain"
+        },
+        {
+            "default": "30",
+            "fieldname": "expiration_days",
+            "fieldtype": "Int",
+            "label": "Expiration Days"
+        }
+    ],
+    "issingle": 1,
+    "links": [],
+    "modified": "2024-05-22 10:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Frappe Identity",
+    "name": "Ghost Settings",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "print": 1,
+            "read": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}
