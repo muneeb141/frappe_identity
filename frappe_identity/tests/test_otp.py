@@ -1,0 +1,43 @@
+import frappe
+import unittest
+from frappe_identity.frappe_identity.api.otp import send_otp, validate_otp
+
+class TestFrappeIdentityOTP(unittest.TestCase):
+	def setUp(self):
+		frappe.db.set_value("OTP Settings", "OTP Settings", "max_otp_attempts", 5)
+		frappe.db.set_value("OTP Settings", "OTP Settings", "otp_delivery_type", "Email")
+
+	def test_otp_flow(self):
+		email = "test_otp@guest.local"
+		
+
+
+		# 1. Send OTP
+		response = send_otp(email=email, purpose="sign_up")
+		if response.get("http_status_code") != 200:
+			print(f"\n[DEBUG] Send OTP Failed: {response.get('message')} - {response.get('error')}")
+		self.assertEqual(response.get("http_status_code"), 200, f"Send OTP Failed: {response.get('message')}")
+
+		
+		# Find the OTP
+		otp_name = frappe.db.get_value("OTP", {"email": email, "status": "Valid"}, "name")
+		self.assertTrue(otp_name, "OTP Document should be created")
+
+		otp_doc = frappe.get_doc("OTP", otp_name)
+		code = otp_doc.otp_code
+		
+		# 2. Verify Valid OTP
+		# Note: validate_otp calls verify_otp which might raise exceptions or return None.
+		# The API wrapper returns a dict.
+		response = validate_otp(otp_code=code, email=email, purpose="sign_up")
+		self.assertEqual(response.get("http_status_code"), 200)
+		
+		# 3. Verify Invalid OTP
+		response_bad = validate_otp(otp_code="000000", email=email, purpose="sign_up")
+		self.assertNotEqual(response_bad.get("http_status_code"), 200)
+
+		# 4. Cleanup
+		frappe.delete_doc("OTP", otp_name)
+
+	def tearDown(self):
+		pass

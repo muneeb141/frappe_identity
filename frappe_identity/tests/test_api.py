@@ -1,6 +1,6 @@
 import frappe
 import unittest
-from frappe_identity.frappe_identity.api import create_ghost_session
+from frappe_identity.frappe_identity.api.ghost import create_ghost_session
 
 class TestFrappeIdentityAPI(unittest.TestCase):
 	def setUp(self):
