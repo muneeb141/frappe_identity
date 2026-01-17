@@ -1,37 +1,104 @@
-# Ghost
+# Ghost 👻
 
-**Ghost** is a specialized app for managing Guest User identities, OTP-based authentication, and Ghost authentication flows in Frappe.
+**Ghost** is a specialized Frappe application for managing Guest User identities and One-Time Password (OTP) authentication. It allows you to create temporary "Ghost" users for guest sessions and verify user identity via Email/SMS OTPs without requiring full registration.
 
 ## Features
 
--   **OTP Management**: Generate, send (Email/SMS), and validate One-Time Passwords.
--   **Ghost Users**: Create temporary "Ghost" users for guest sessions without requiring full registration.
--   **Rate Limiting**: Built-in security to prevent OTP spamming.
--   **Auto-Cleanup**: Scheduled tasks to remove expired Ghost users and OTP logs.
+### 🔐 Authentication (OTP)
+-   **Multi-Channel Support**: Send OTPs via Email or SMS.
+-   **Secure Validation**: Time-based expiry, consumption tracking, and secure random code generation.
+-   **Rate Limiting**: Built-in protection against brute-force and spam (configurable limits).
+
+### 👤 Identity (Ghost Users)
+-   **Guest Sessions**: Instantly create temporary users (`ghost_randomID@guest.local`) with limited permissions.
+-   **Auto-Cleanup**: Scheduled daily tasks automatically delete expired Ghost users and old OTP logs to maintain database hygiene.
+-   **API Access**: Generates API Keys/Secrets for Ghost users for immediate client-side use.
+
+---
 
 ## Installation
 
-1.  Get the app:
+1.  **Get the App**
     ```bash
-    bench get-app ghost [URL]
+    bench get-app ghost https://github.com/muneeb141/ghost
     ```
 
-2.  Install on your site:
+2.  **Install on Site**
     ```bash
-    bench --site [site-name] install-app ghost
+    bench --site [your-site] install-app ghost
     ```
 
-## Usage
+---
 
-### OTP Generation
-Refer to the `OTP` DocType to configure settings.
-API endpoints:
--   `/api/method/ghost.api.otp.send_otp`
--   `/api/method/ghost.api.otp.validate_otp`
+## Configuration
 
-### Ghost Users
-API endpoints:
--   `/api/method/ghost.api.ghost.create_ghost_session`
+### OTP Settings
+Search for **OTP Settings** in the desk.
+-   **Delivery Method**: Email, SMS, or Both.
+-   **OTP Length**: Default 6 digits.
+-   **Expiry Time**: Validity duration in minutes.
+-   **Max Attempts**: Max OTPs a user can request per hour.
+
+### Ghost Settings
+Search for **Ghost Settings** in the desk.
+-   **Enable Ghost Feature**: Master switch.
+-   **Enable Auto Cleanup**: Turn on daily deletion of old users.
+-   **Expiration Days**: How many days a Ghost user remains valid (Default: 30).
+
+---
+
+## API Reference
+
+### 1. Send OTP
+**Endpoint**: `/api/method/ghost.api.otp.send_otp`
+**Method**: `POST`
+
+```bash
+curl -X POST https://your-site.com/api/method/ghost.api.otp.send_otp \
+    -H "Content-Type: application/json" \
+    -d '{"email": "user@example.com", "purpose": "Login"}'
+```
+
+### 2. Validate OTP
+**Endpoint**: `/api/method/ghost.api.otp.validate_otp`
+**Method**: `POST`
+
+```bash
+curl -X POST https://your-site.com/api/method/ghost.api.otp.validate_otp \
+    -H "Content-Type: application/json" \
+    -d '{"email": "user@example.com", "otp_code": "123456", "purpose": "Login"}'
+```
+
+### 3. Create Ghost Session
+**Endpoint**: `/api/method/ghost.api.ghost.create_ghost_session`
+**Method**: `POST`
+**Access**: Public (Allow Guest)
+
+```bash
+curl -X POST https://your-site.com/api/method/ghost.api.ghost.create_ghost_session
+```
+
+**Response**:
+```json
+{
+    "user": "ghost_8f2a1c@guest.local",
+    "api_key": "1234567890abcdef",
+    "api_secret": "abcdef1234567890"
+}
+```
+
+---
+
+## Testing
+
+The app includes a comprehensive test suite covering all features (OTP lifecycle, Expiry, Rate Limits, cleanup).
+
+Run the full suite:
+```bash
+bench --site [your-site] run-tests --module ghost.tests.test_full_suite
+```
+
+---
 
 ## License
 

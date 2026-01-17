@@ -5,7 +5,7 @@ from ghost.ghost.doctype.otp.otp import generate as generate_otp
 from ghost.ghost.doctype.otp.otp import verify as verify_otp
 
 
-# API: POST /api/method/otp_generation.api.send_otp
+# API: POST /api/method/ghost.api.send_otp
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 def send_otp(email=None, phone=None, purpose=None, user=None):
 	"""
@@ -44,7 +44,7 @@ def send_otp(email=None, phone=None, purpose=None, user=None):
 		return frappe.local.response
 
 
-# API: POST /api/method/otp_generation.api.validate_otp
+# API: POST /api/method/ghost.api.validate_otp
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 def validate_otp(otp_code, email=None, phone=None, purpose=None):
 	"""
