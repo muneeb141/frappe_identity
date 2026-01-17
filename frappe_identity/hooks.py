@@ -158,7 +158,12 @@ after_install = "frappe_identity.setup.after_install"
 scheduler_events = {
 	"daily": [
 		"frappe_identity.tasks.delete_expired_ghost_users"
-	]
+	],
+	"cron": {
+		"*/10 * * * *": [
+			"frappe_identity.tasks.expire_otps"
+		]
+	}
 }
 
 
