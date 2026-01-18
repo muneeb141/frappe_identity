@@ -229,3 +229,37 @@ class TestFrappeIdentityAPI(unittest.TestCase):
 		self.assertTrue(frappe.db.exists("User", real_email), "Real user should serve")
 		print(f"\n[Success] Verified Strict OTP flow for {real_email}")
 
+	def test_role_transition(self):
+		"""
+		Test that Roles are correctly swapped after conversion.
+		"""
+		from ghost.api.ghost import create_ghost_session, convert_to_real_user
+
+		# 1. Config
+		target_role = "Blogger" 
+		if not frappe.db.exists("Role", target_role):
+			frappe.get_doc({"doctype": "Role", "role_name": target_role}).insert()
+
+		settings = frappe.get_single("Ghost Settings")
+		settings.default_converted_role = target_role
+		settings.ghost_role = "Guest"
+		settings.save()
+
+		# 2. Create Ghost
+		ghost_data = create_ghost_session()
+		ghost_email = ghost_data["user"]
+		
+		# 3. Convert
+		real_email = "role_test@example.com"
+		if frappe.db.exists("User", real_email):
+			frappe.delete_doc("User", real_email, force=1)
+
+		convert_to_real_user(ghost_email, real_email)
+
+		# 4. Verify Roles
+		real_user = frappe.get_doc("User", real_email)
+		roles = [r.role for r in real_user.roles]
+		
+		self.assertIn(target_role, roles, f"User should have {target_role}")
+		print(f"\n[Success] Verified Role Transition: Ghost -> {target_role}")
+

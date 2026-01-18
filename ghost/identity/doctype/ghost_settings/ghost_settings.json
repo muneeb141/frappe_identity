@@ -73,6 +73,13 @@
             "label": "Verify OTP on Conversion"
         },
         {
+            "description": "Role to assign to the user after successful conversion (e.g., Customer). If empty, no role changes are made.",
+            "fieldname": "default_converted_role",
+            "fieldtype": "Link",
+            "label": "Default Converted Role",
+            "options": "Role"
+        },
+        {
             "fieldname": "tab_otp",
             "fieldtype": "Tab Break",
             "label": "OTP Configuration"

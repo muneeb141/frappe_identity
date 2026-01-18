@@ -108,12 +108,21 @@ def convert_to_real_user(ghost_email, real_email, first_name=None, last_name=Non
 	# Remove Ghost Role
 	ghost_role = settings.ghost_role or "Guest"
 	existing_roles = [r.role for r in user.roles]
+	
+	# If converted role is configured, use it. Otherwise default to Website User logic.
+	target_role = settings.default_converted_role
+	
+	# Transition: Remove Ghost -> Add Target
 	if ghost_role in existing_roles:
 		user.remove_roles(ghost_role)
-
-	# Add Website User if needed (only if new user or missing)
-	if "Website User" not in existing_roles:
-		user.add_roles("Website User")
+		
+	if target_role:
+		if target_role not in existing_roles:
+			user.add_roles(target_role)
+	else:
+		# Fallback: maintain basic access
+		if "Website User" not in existing_roles:
+			user.add_roles("Website User")
 
 	# Update Details
 	if first_name:
