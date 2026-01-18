@@ -86,16 +86,26 @@ curl -X POST https://your-site.com/api/method/ghost.api.ghost.create_ghost_sessi
     "api_secret": "abcdef1234567890"
 }
 ```
+### 4. Convert to Real User
+**Endpoint**: `/api/method/ghost.api.ghost.convert_to_real_user`
+**Method**: `POST`
+**Access**: System/Admin (or Privileged Context)
+
+```bash
+curl -X POST https://your-site.com/api/method/ghost.api.ghost.convert_to_real_user \
+    -H "Content-Type: application/json" \
+    -d '{"ghost_email": "ghost_xxx@guest.local", "real_email": "real@example.com", "first_name": "John"}'
+```
 
 ---
 
 ## Testing
 
-The app includes a comprehensive test suite covering all features (OTP lifecycle, Expiry, Rate Limits, cleanup).
+The app includes a comprehensive test suite.
 
-Run the full suite:
+Run the tests:
 ```bash
-bench --site [your-site] run-tests --module ghost.tests.test_full_suite
+bench --site [your-site] run-tests --module ghost.tests.test_api
 ```
 
 ---

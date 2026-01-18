@@ -1,6 +1,6 @@
 import frappe
 import unittest
-from ghost.ghost.api.ghost import create_ghost_session
+from ghost.api.ghost import create_ghost_session
 
 class TestFrappeIdentityAPI(unittest.TestCase):
 	def setUp(self):
@@ -104,3 +104,34 @@ class TestFrappeIdentityAPI(unittest.TestCase):
 		self.assertTrue(frappe.db.exists("User", old_email), "Old ghost should remain when cleanup is disabled")
 		print("\n[Success] Verified Control: Cleanup respects disabled setting.")
 
+	def test_convert_to_real_user(self):
+		from ghost.api.ghost import create_ghost_session, convert_to_real_user
+		
+		# 1. Create Ghost
+		ghost_data = create_ghost_session()
+		ghost_email = ghost_data["user"]
+		
+		# 2. Simulate some data (e.g. assign a role or a doc)
+		# For simplicity, just verify existence
+		self.assertTrue(frappe.db.exists("User", ghost_email))
+		
+		# 3. Convert
+		real_email = "real_user@example.com"
+		if frappe.db.exists("User", real_email):
+			frappe.delete_doc("User", real_email, force=True)
+
+		result = convert_to_real_user(ghost_email, real_email, "Real", "Human")
+		
+		# 4. Verify
+		self.assertFalse(frappe.db.exists("User", ghost_email), "Ghost email should be renamed")
+		self.assertTrue(frappe.db.exists("User", real_email), "Real email should exist")
+		
+		user = frappe.get_doc("User", real_email)
+		self.assertEqual(user.first_name, "Real")
+		self.assertEqual(user.last_name, "Human")
+		
+		roles = [r.role for r in user.roles]
+		self.assertNotIn("Ghost", roles, "Ghost role should be removed")
+		self.assertIn("Website User", roles, "Should have default role")
+		
+		print(f"\n[Success] Converted {ghost_email} -> {real_email}")
