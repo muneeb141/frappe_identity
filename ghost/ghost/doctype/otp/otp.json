@@ -67,7 +67,7 @@
             "in_list_view": 1,
             "in_standard_filter": 1,
             "label": "Delivery Method",
-            "options": "Email\nSMS\nBoth",
+            "options": "Email\nSMS\nBoth\nNone",
             "reqd": 1
         },
         {

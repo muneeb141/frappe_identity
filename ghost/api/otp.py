@@ -21,7 +21,7 @@ def send_otp(email=None, phone=None, purpose=None, user=None):
 	    Standardized response with OTP code and name
 	"""
 	try:
-		generate_otp(
+		response = generate_otp(
 			email=email,
 			phone=phone,
 			purpose=purpose,
@@ -29,7 +29,9 @@ def send_otp(email=None, phone=None, purpose=None, user=None):
 		)
 		frappe.local.response["http_status_code"] = 200
 		frappe.local.response["message"] = _("OTP generated successfully")
-		return
+
+
+
 
 	except frappe.ValidationError as e:
 		frappe.local.response["http_status_code"] = 400
@@ -66,9 +68,12 @@ def validate_otp(otp_code, email=None, phone=None, purpose=None):
 			return
 
 		if not email and not phone:
-			frappe.local.response["http_status_code"] = 400
-			frappe.local.response["message"] = _("Either email or phone must be provided")
-			return
+			settings = frappe.get_single("Ghost Settings")
+			if not settings.allow_anonymous_otp:
+				frappe.local.response["http_status_code"] = 400
+				frappe.local.response["message"] = _("Either email or phone must be provided")
+				return
+
 
 		verify_otp(otp_code=otp_code, email=email, phone=phone, purpose=purpose)
 

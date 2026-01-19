@@ -8,6 +8,8 @@
 -   **Multi-Channel Support**: Send OTPs via Email or SMS.
 -   **Secure Validation**: Time-based expiry, consumption tracking, and secure random code generation.
 -   **Rate Limiting**: Built-in protection against brute-force and spam (configurable limits).
+-   **Anonymous OTP**: Generate valid OTPs for internal logic without requiring email/phone (configurable via settings).
+
 
 ### 👤 Identity (Ghost Users)
 -   **Guest Sessions**: Instantly create temporary users (`ghost_randomID@guest.local`) with limited permissions.
@@ -45,6 +47,9 @@ Search for **Ghost Settings** in the desk. All configurations are now consolidat
 -   **OTP Length**: Default 6 digits.
 -   **Expiry Time**: Validity duration in minutes.
 -   **Max Attempts**: Max OTPs a user can request per hour.
+-   **Allow Anonymous OTP**: Checkbox to enable generating OTPs without email/phone.
+-   **Delivery Method "None"**: Select "None" if you want to use OTPs only for internal database validation (Anonymous or otherwise) without sending any external messages.
+
 
 ---
 
@@ -60,6 +65,16 @@ curl -X POST https://your-site.com/api/method/ghost.api.otp.send_otp \
     -d '{"email": "user@example.com", "purpose": "Login"}' 
     # Purpose can be: "sign_up", "reset_password", "Login", "Conversion"
 ```
+
+**Anonymous Usage:**
+If `Allow Anonymous OTP` is enabled, you can call this without `email` or `phone`.
+```bash
+curl -X POST https://your-site.com/api/method/ghost.api.otp.send_otp \
+    -H "Content-Type: application/json" \
+    -d '{"purpose": "Login"}'
+```
+*Note: The OTP code is NOT returned in the response. It is stored in the database.*
+
 
 ### 2. Validate OTP
 **Endpoint**: `/api/method/ghost.api.otp.validate_otp`
