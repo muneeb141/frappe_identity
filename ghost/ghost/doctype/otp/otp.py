@@ -51,11 +51,18 @@ def generate(email=None, phone=None, purpose=None, user=None, send=True):
 	settings = frappe.get_single("Ghost Settings")
 	delivery_method = settings.otp_delivery_type or "Email"
 
-	if delivery_method in ["Email", "Both"] and not email:
-		frappe.throw(_(f"Email is required for {delivery_method} delivery method"))
 
-	if delivery_method in ["SMS", "Both"] and not phone:
-		frappe.throw(_(f"Phone is required for {delivery_method} delivery method"))
+
+	if not settings.allow_anonymous_otp:
+		if delivery_method in ["Email", "Both"] and not email:
+			frappe.throw(_(f"Email is required for {delivery_method} delivery method"))
+
+		if delivery_method in ["SMS", "Both"] and not phone:
+			frappe.throw(_(f"Phone is required for {delivery_method} delivery method"))
+	if not purpose:
+		purpose = "Login"
+
+
 
 	otp_length = settings.otp_length or 6
 	otp_code_type = settings.otp_code_type or "Numeric"
@@ -88,8 +95,9 @@ def generate(email=None, phone=None, purpose=None, user=None, send=True):
 	send_results = []
 	if send:
 		try:
-			if delivery_method in ["Email", "Both"]:
+			if delivery_method in ["Email", "Both"] and email:
 				email_result = send_otp(
+
 					otp_code=otp_code,
 					delivery_method="Email",
 					email=email,
@@ -99,8 +107,9 @@ def generate(email=None, phone=None, purpose=None, user=None, send=True):
 				if email_result:
 					send_results.append(email_result)
 
-			if delivery_method in ["SMS", "Both"]:
+			if delivery_method in ["SMS", "Both"] and phone:
 				sms_result = send_otp(
+
 					otp_code=otp_code, delivery_method="SMS", email=email, phone=phone, otp_name=otp_doc.name
 				)
 				if sms_result:
@@ -110,14 +119,8 @@ def generate(email=None, phone=None, purpose=None, user=None, send=True):
 				message=f"OTP generated but failed to send: {frappe.get_traceback()}", title="OTP Generation"
 			)
 
-	print(f"\n[DEBUG] Returning from generate: otp_code={otp_code}, name={otp_doc.name}, send_results={send_results}") 
-	import json
-	try:
-		json.dumps(send_results)
-	except Exception as e:
-		print(f"\n[DEBUG] Circular reference in send_results: {e}")
-		# Force sanitize
-		send_results = str(send_results)
+
+
 
 	return {
 		"otp_code": otp_code,
@@ -129,7 +132,11 @@ def generate(email=None, phone=None, purpose=None, user=None, send=True):
 
 def verify(otp_code, email=None, phone=None, purpose=None):
 	otp_doc = None
+	if not purpose:
+		purpose = "Login"
+
 	if email and frappe.db.exists(
+
 		"OTP", {"otp_code": otp_code, "email": email, "status": "Valid", "purpose": purpose}
 	):
 		otp_doc = frappe.get_doc(
@@ -143,9 +150,24 @@ def verify(otp_code, email=None, phone=None, purpose=None):
 			"OTP",
 			{"otp_code": otp_code, "phone": phone, "status": "Valid", "purpose": purpose},
 		)
+	
+	else:
+		settings = frappe.get_single("Ghost Settings")
+		if settings.allow_anonymous_otp and not email and not phone:
+			if frappe.db.exists(
+				"OTP", {"otp_code": otp_code, "status": "Valid", "purpose": purpose}
+			):
+				otp_doc = frappe.get_doc(
+					"OTP",
+					{"otp_code": otp_code, "status": "Valid", "purpose": purpose},
+				)
+
+
+
 
 	if not otp_doc:
 		frappe.throw(_("Invalid OTP"))
+
 
 	otp_doc.check_expiry()
 

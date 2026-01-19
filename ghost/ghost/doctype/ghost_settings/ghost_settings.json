@@ -1,6 +1,6 @@
 {
     "actions": [],
-    "creation": "2026-01-27 10:00:00.000000",
+    "creation": "2026-01-19 10:00:00.000000",
     "doctype": "DocType",
     "engine": "InnoDB",
     "field_order": [
@@ -16,6 +16,7 @@
         "verify_otp_on_conversion",
         "tab_otp",
         "expiry_time_minutes",
+        "allow_anonymous_otp",
         "max_otp_attempts",
         "otp_length",
         "otp_code_type",
@@ -100,6 +101,13 @@
             "reqd": 1
         },
         {
+            "default": "0",
+            "description": "If enabled, allows generating OTPs without email or phone. The OTP code will be returned in the API response.",
+            "fieldname": "allow_anonymous_otp",
+            "fieldtype": "Check",
+            "label": "Allow Anonymous OTP"
+        },
+        {
             "default": "5",
             "description": "Maximum number of OTP Attempts for a user[email/phone] per hour",
             "fieldname": "max_otp_attempts",
@@ -132,7 +140,7 @@
             "fieldname": "otp_delivery_type",
             "fieldtype": "Select",
             "label": "OTP Delivery Type",
-            "options": "Email\nSMS\nBoth",
+            "options": "Email\nSMS\nBoth\nNone",
             "reqd": 1
         },
         {

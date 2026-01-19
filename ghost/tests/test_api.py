@@ -221,8 +221,11 @@ class TestFrappeIdentityAPI(unittest.TestCase):
 
 
 		# 4. Generate OTP
-		resp = send_otp(email=real_email, purpose="Conversion")
+		frappe.local.response = frappe._dict()
+		send_otp(email=real_email, purpose="Conversion")
+		resp = frappe.local.response
 		self.assertEqual(resp.get("http_status_code"), 200, f"Send OTP Failed: {resp}")
+
 		
 		otp_name = frappe.db.get_value("OTP", {"email": real_email, "purpose": "Conversion", "status": "Valid"}, "name")
 		self.assertTrue(otp_name, "OTP should be generated")
